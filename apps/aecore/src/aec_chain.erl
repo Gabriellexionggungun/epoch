@@ -38,6 +38,7 @@
 %%% Accounts API
 -export([ all_accounts_balances_at_hash/1
         , get_account/1
+        , get_account_nonce/1
         , get_account_at_hash/2
         ]).
 
@@ -83,6 +84,14 @@ get_account(PubKey) ->
         {ok, Trees} ->
             aec_accounts_trees:lookup(PubKey, aec_trees:accounts(Trees));
         error -> {error, no_state_trees}
+    end.
+
+get_account_nonce(PubKey) ->
+    case get_account(PubKey) of
+        {value, Account} ->
+            {ok, aec_accounts:nonce(Account)};
+        _ -> 
+            {error, account_not_found}
     end.
 
 get_account_at_hash(PubKey, Hash) ->
