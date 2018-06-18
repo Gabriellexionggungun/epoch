@@ -1536,6 +1536,43 @@
         }
       }
     },
+    "/account/{account_pubkey}/nonce" : {
+      "get" : {
+        "tags" : [ "external", "chain" ],
+        "description" : "Get accounts's last used nonce on chain",
+        "operationId" : "GetAccountNonce",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "account_pubkey",
+          "in" : "path",
+          "description" : "Account pubkey to show nonce for",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "integer",
+              "format" : "int64",
+              "minimum" : 0
+            }
+          },
+          "400" : {
+            "description" : "Invalid account_pubkey provided",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Account not found",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/balances" : {
       "get" : {
         "tags" : [ "external", "debug" ],
