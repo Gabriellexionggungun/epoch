@@ -105,7 +105,7 @@ new_without_backend() ->
 new_poi(Trees) ->
     internal_new_poi(Trees).
 
--spec add_poi(tree_type(), aec_keys:pubkey(), trees(), poi()) -> {'ok', binary(), poi()}
+-spec add_poi(tree_type(), aec_keys:pubkey(), trees(), poi()) -> {'ok', poi()}
                                                       | {'error', term()}.
 add_poi(accounts, PubKey, Trees, #poi{} = Poi) ->
     internal_add_accounts_poi(PubKey, accounts(Trees), Poi);
@@ -135,12 +135,14 @@ serialize_poi(#poi{} = Poi) ->
 deserialize_poi(Bin) when is_binary(Bin) ->
     internal_deserialize_poi(Bin).
 
--spec verify_poi(tree_type(), aec_keys:pubkey(), binary(), poi()) -> 'ok'
-                                                          | {'error', term()}.
-verify_poi(accounts, PubKey, SerializedAccount, #poi{} = Poi) ->
-    internal_verify_accounts_poi(PubKey, SerializedAccount, Poi);
-verify_poi(contracts, PubKey, SerializedContract, #poi{} = Poi) ->
-    internal_verify_contracts_poi(PubKey, SerializedContract, Poi);
+-spec verify_poi(tree_type(), aec_keys:pubkey(), Object, poi()) ->
+                        'ok' | {'error', term()} when
+      Object :: aec_accounts:account()
+              | aect_contracts:contract().
+verify_poi(accounts, PubKey, Account, #poi{} = Poi) ->
+    internal_verify_accounts_poi(PubKey, Account, Poi);
+verify_poi(contracts, PubKey, Contract, #poi{} = Poi) ->
+    internal_verify_contracts_poi(PubKey, Contract, Poi);
 verify_poi(Type,_PubKey,_Account, #poi{} =_Poi) ->
     error({nyi, Type}).
 
@@ -345,8 +347,8 @@ internal_add_accounts_poi(_Pubkey,_Trees, #poi{accounts = empty}) ->
     {error, not_present};
 internal_add_accounts_poi(Pubkey, Trees, #poi{accounts = {poi, APoi}} = Poi) ->
     case aec_accounts_trees:add_poi(Pubkey, Trees, APoi) of
-        {ok, SerializedAccount, NewAPoi} ->
-            {ok, SerializedAccount, Poi#poi{accounts = {poi, NewAPoi}}};
+        {ok, NewAPoi} ->
+            {ok, Poi#poi{accounts = {poi, NewAPoi}}};
         {error, _} = E -> E
     end.
 
@@ -354,8 +356,8 @@ internal_add_contracts_poi(_ContractPubKey, _Trees, #poi{contracts = empty}) ->
     {error, not_present};
 internal_add_contracts_poi(ContractPubKey, Trees, #poi{contracts = {poi, CPoi}} = Poi) ->
     case aect_state_tree:add_poi(ContractPubKey, Trees, CPoi) of
-        {ok, SerializedContract, NewAPoi} ->
-            {ok, SerializedContract, Poi#poi{contracts = {poi, NewAPoi}}};
+        {ok, NewAPoi} ->
+            {ok, Poi#poi{contracts = {poi, NewAPoi}}};
         {error, _} = E -> E
     end.
 
