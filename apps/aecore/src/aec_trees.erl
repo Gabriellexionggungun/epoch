@@ -45,6 +45,12 @@
          verify_poi/4
         ]).
 
+-ifdef(TEST).
+-export([internal_serialize_poi_fields/1,
+         internal_serialize_poi_from_fields/1
+        ]).
+-endif.
+
 -record(trees, {
           accounts  :: aec_accounts_trees:tree(),
           calls     :: aect_call_state_tree:tree(),
@@ -395,21 +401,26 @@ new_part_poi(<<_:?STATE_HASH_BYTES/unit:8>> = Hash) ->
 
 -define(POI_VSN, 1).
 
-internal_serialize_poi(#poi{ accounts  = Accounts
-                           , calls     = Calls
-                           , channels  = Channels
-                           , contracts = Contracts
-                           , ns        = Ns
-                           , oracles   = Oracles
-                           }) ->
+internal_serialize_poi(Poi) ->
+    Fields = internal_serialize_poi_fields(Poi),
+    internal_serialize_poi_from_fields(Fields).
 
-    Fields = [ {accounts  , serialization_format(Accounts)}
-             , {calls     , serialization_format(Calls)}
-             , {channels  , serialization_format(Channels)}
-             , {contracts , serialization_format(Contracts)}
-             , {ns        , serialization_format(Ns)}
-             , {oracles   , serialization_format(Oracles)}
-             ],
+internal_serialize_poi_fields(#poi{ accounts  = Accounts
+                                  , calls     = Calls
+                                  , channels  = Channels
+                                  , contracts = Contracts
+                                  , ns        = Ns
+                                  , oracles   = Oracles
+                                  }) ->
+    [ {accounts  , serialization_format(Accounts)}
+    , {calls     , serialization_format(Calls)}
+    , {channels  , serialization_format(Channels)}
+    , {contracts , serialization_format(Contracts)}
+    , {ns        , serialization_format(Ns)}
+    , {oracles   , serialization_format(Oracles)}
+    ].
+
+internal_serialize_poi_from_fields(Fields) ->
     aec_object_serialization:serialize(trees_poi,
                                        ?POI_VSN,
                                        internal_serialize_poi_template(?POI_VSN),
