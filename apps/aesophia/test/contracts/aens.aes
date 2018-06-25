@@ -1,0 +1,9 @@
+// AENS tests
+contract AENSTest =
+
+  function lookup_word(name : string, key : string) : option(address) =
+    AENS.resolve(name, key)
+
+  function lookup_string(name : string, key : string) : option(string) =
+    AENS.resolve(name, key)
+
